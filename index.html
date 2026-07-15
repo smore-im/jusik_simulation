@@ -3,154 +3,326 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>점검 중입니다</title>
-
+<title>실시간 수익률 순위</title>
 <style>
-:root{
-    --navy:#10131a;
-    --navy2:#171b26;
-    --line:#2b3242;
-    --gold:#f4b740;
-    --ink:#e8ecf4;
-    --ink-dim:#9aa3b8;
-    --up:#26d07c;
-}
-
-*{
+  :root{
+    --bg:#0B0F14;
+    --panel:#131A24;
+    --panel-2:#182130;
+    --line:#232E3F;
+    --text:#E7ECF3;
+    --muted:#7C8798;
+    --up:#29D398;
+    --down:#FF6B6B;
+    --gold:#F5C451;
+    --mono: 'IBM Plex Mono', 'Consolas', monospace;
+    --sans: 'Space Grotesk', 'Pretendard', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
     margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-body{
-    background:var(--navy);
-    color:var(--ink);
-    font-family:sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #1a2436 0%, var(--bg) 55%);
+    color:var(--text);
+    font-family:var(--sans);
     min-height:100vh;
+    padding:40px 20px 60px;
+  }
+  @font-face{
+    /* 시스템 폰트로 자연스럽게 대체됩니다. 별도 웹폰트 로드가 필요하면
+       <link> 태그를 head에 추가하세요. */
+  }
+
+  .ticker-wrap{
+    overflow:hidden;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    background:var(--panel);
+    padding:8px 0;
+    margin-bottom:36px;
+  }
+  .ticker{
     display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-}
+    gap:36px;
+    white-space:nowrap;
+    width:max-content;
+    animation:scroll 22s linear infinite;
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--muted);
+  }
+  .ticker span b{color:var(--text);font-weight:600;}
+  @keyframes scroll{
+    from{transform:translateX(0);}
+    to{transform:translateX(-50%);}
+  }
 
-.container{
-    width:100%;
-    max-width:500px;
-    background:var(--navy2);
-    border:1px solid var(--line);
-    border-radius:20px;
-    padding:30px;
-}
-
-h1{
+  header{
+    max-width:640px;
+    margin:0 auto 34px;
     text-align:center;
-    color:var(--gold);
-    margin-bottom:10px;
-}
-
-.notice{
-    text-align:center;
-    color:var(--ink-dim);
-    line-height:1.6;
-    margin-bottom:30px;
-}
-
-.rank-title{
-    display:flex;
+  }
+  .eyebrow{
+    display:inline-flex;
     align-items:center;
     gap:8px;
-    margin-bottom:15px;
-    font-size:18px;
-    font-weight:bold;
-}
-
-.live{
-    color:var(--up);
+    font-family:var(--mono);
     font-size:12px;
-}
+    letter-spacing:.08em;
+    color:var(--up);
+    background:rgba(41,211,152,0.08);
+    border:1px solid rgba(41,211,152,0.25);
+    padding:5px 12px;
+    border-radius:999px;
+    margin-bottom:18px;
+  }
+  .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--up);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1; box-shadow:0 0 0 0 rgba(41,211,152,.5);}
+    50%{opacity:.6; box-shadow:0 0 0 6px rgba(41,211,152,0);}
+  }
+  h1{
+    font-size:clamp(26px,4vw,34px);
+    font-weight:700;
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    color:var(--muted);
+    font-size:14.5px;
+    line-height:1.6;
+    margin:0;
+  }
 
-.rank-list{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.rank-item{
-    background:var(--navy);
-    padding:12px;
-    border-radius:10px;
-    display:flex;
-    justify-content:space-between;
+  #rankList{
+    max-width:640px;
+    margin:0 auto;
+  }
+  .rank-row{
+    display:grid;
+    grid-template-columns:44px 1fr auto;
     align-items:center;
-}
-
-.rank-item.top1{
-    border:1px solid var(--gold);
-}
-
-.rank-item span:first-child{
-    font-weight:bold;
-}
-
-.footer{
-    margin-top:25px;
+    gap:16px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 20px;
+    margin-bottom:10px;
+    position:relative;
+    overflow:hidden;
+  }
+  .rank-row.gold{
+    border-color:rgba(245,196,81,0.4);
+    background:linear-gradient(90deg, rgba(245,196,81,0.09), var(--panel) 55%);
+  }
+  .rank-num{
+    font-family:var(--mono);
+    color:var(--muted);
+    font-size:15px;
     text-align:center;
-    color:var(--ink-dim);
-    font-size:13px;
-}
+  }
+  .medal{font-size:22px; text-align:center;}
+  .name{
+    font-weight:600;
+    font-size:16px;
+    letter-spacing:-0.01em;
+  }
+  .bar-track{
+    height:4px;
+    background:var(--line);
+    border-radius:2px;
+    margin-top:8px;
+    overflow:hidden;
+    max-width:220px;
+  }
+  .bar-fill{
+    height:100%;
+    border-radius:2px;
+    transition:width .6s ease;
+  }
+  .bar-fill.up{background:var(--up);}
+  .bar-fill.down{background:var(--down);}
+  .pct{
+    font-family:var(--mono);
+    font-size:19px;
+    font-weight:600;
+    min-width:88px;
+    text-align:right;
+  }
+  .up{color:var(--up);}
+  .down{color:var(--down);}
+
+  .state-msg{
+    text-align:center;
+    color:var(--muted);
+    font-size:14px;
+    padding:50px 20px;
+    font-family:var(--mono);
+  }
+  .state-msg.err{color:var(--down);}
+
+  .skeleton{
+    height:64px;
+    border-radius:14px;
+    background:linear-gradient(90deg, var(--panel) 0%, var(--panel-2) 50%, var(--panel) 100%);
+    background-size:200% 100%;
+    animation:shimmer 1.4s ease-in-out infinite;
+    margin-bottom:10px;
+  }
+  @keyframes shimmer{
+    0%{background-position:200% 0;}
+    100%{background-position:-200% 0;}
+  }
+
+  footer{
+    max-width:640px;
+    margin:34px auto 0;
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    font-family:var(--mono);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .ticker, .dot, .skeleton{animation:none;}
+  }
 </style>
 </head>
-
 <body>
 
-<div class="container">
-
-    <h1>🔧 점검 중입니다</h1>
-
-    <p class="notice">
-        현재 모의투자 배틀을 점검 중입니다.<br>
-        잠시 후 다시 이용해 주세요.
-    </p>
-
-    <div class="rank-title">
-        🏆 실시간 순위표
-        <span class="live">● LIVE</span>
-    </div>
-
-    <div class="rank-list">
-
-        <div class="rank-item top1">
-            <span>1위 홍길동</span>
-            <span>+38.42%</span>
-        </div>
-
-        <div class="rank-item">
-            <span>2위 김철수</span>
-            <span>+27.15%</span>
-        </div>
-
-        <div class="rank-item">
-            <span>3위 이영희</span>
-            <span>+19.88%</span>
-        </div>
-
-        <div class="rank-item">
-            <span>4위 박민수</span>
-            <span>+14.53%</span>
-        </div>
-
-        <div class="rank-item">
-            <span>5위 최지우</span>
-            <span>+11.20%</span>
-        </div>
-
-    </div>
-
-    <div class="footer">
-        순위는 마지막 집계 기준입니다.
-    </div>
-
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker">
+    <span>불러오는 중...</span>
+  </div>
 </div>
 
+<header>
+  <div class="eyebrow"><span class="dot"></span>LIVE</div>
+  <h1>실시간 수익률 순위</h1>
+  <p>210초 모의투자 부스 참가자 중 최고 수익률 TOP 5입니다.<br>내 이름이 보드에 오르는 순간까지, 시장은 계속 움직입니다.</p>
+</header>
+
+<div id="rankList">
+  <div class="skeleton"></div>
+  <div class="skeleton"></div>
+  <div class="skeleton"></div>
+</div>
+
+<footer>UPDATED IN REAL TIME · TOP 5 OF ALL PARTICIPANTS</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ============================================================
+// firebaseConfig — 기존 프로젝트의 설정 값으로 교체하세요.
+// ============================================================
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const RANK_TOP_N = 5;
+
+function pct(n){
+  return (n>=0?"+":"") + n.toFixed(2) + "%";
+}
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;',
+      '"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function barWidth(pctValue, maxAbs){
+  if(maxAbs === 0) return 0;
+  return Math.min(100, Math.round((Math.abs(pctValue)/maxAbs)*100));
+}
+
+function rankRowHTML(r,i,maxAbs){
+  const medal=["🥇","🥈","🥉"];
+  const dir = r.returnPct>=0 ? "up" : "down";
+  const width = barWidth(r.returnPct, maxAbs);
+  return `
+    <div class="rank-row ${i===0?'gold':''}">
+      <div class="rank-num">${i<3 ? `<span class="medal">${medal[i]}</span>` : (i+1)}</div>
+      <div>
+        <div class="name">${escapeHTML(r.name)}</div>
+        <div class="bar-track"><div class="bar-fill ${dir}" style="width:${width}%"></div></div>
+      </div>
+      <div class="pct ${dir}">${pct(r.returnPct)}</div>
+    </div>
+  `;
+}
+
+function renderTicker(rows){
+  const ticker = document.getElementById("ticker");
+  if(!rows.length){
+    ticker.innerHTML = "<span>아직 기록이 없습니다</span>";
+    return;
+  }
+  const items = rows.map(r =>
+    `<span><b>${escapeHTML(r.name)}</b> ${pct(r.returnPct)}</span>`
+  );
+  // 매끄러운 무한 스크롤을 위해 두 번 이어붙입니다.
+  ticker.innerHTML = [...items, ...items].join("");
+}
+
+function renderList(rows){
+  const list = document.getElementById("rankList");
+
+  if(!rows.length){
+    list.innerHTML = `<div class="state-msg">아직 기록이 없습니다.<br>첫 번째 도전자를 기다리는 중입니다.</div>`;
+    renderTicker([]);
+    return;
+  }
+
+  const maxAbs = Math.max(...rows.map(r => Math.abs(r.returnPct)), 0.01);
+  list.innerHTML = rows.map((r,i)=>rankRowHTML(r,i,maxAbs)).join("");
+  renderTicker(rows);
+}
+
+function renderError(){
+  document.getElementById("rankList").innerHTML =
+    `<div class="state-msg err">순위를 불러오지 못했습니다.<br>잠시 후 자동으로 다시 시도합니다.</div>`;
+}
+
+function subscribeRankBoard(){
+  db.collection("users")
+    .orderBy("bestReturnPct","desc")
+    .limit(200)
+    .onSnapshot(
+      (snap) => {
+        let rows = [];
+        snap.forEach(d=>{
+          const v = d.data();
+          if(typeof v.bestReturnPct === "number" && v.name){
+            rows.push({
+              name: v.name,
+              returnPct: v.bestReturnPct
+            });
+          }
+        });
+        rows = rows.slice(0, RANK_TOP_N);
+        renderList(rows);
+      },
+      (err) => {
+        console.error(err);
+        renderError();
+      }
+    );
+}
+
+subscribeRankBoard();
+</script>
 </body>
 </html>
