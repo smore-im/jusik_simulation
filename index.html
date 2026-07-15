@@ -731,7 +731,7 @@ html,body{height:100%}
       <div class="gate-inner">
         <div class="gate-icon" id="gateIcon">⚠️</div>
         <div class="gate-msg" id="gateMsg">잠시만요</div>
-        <div class="gate-sec"><b id="gateSec">15</b>초</div>
+        <div class="gate-sec"><b id="gateSec">10</b>초</div>
       </div>
     </div>
     <div class="gate-note">잠깐 숨을 고르는 시간이에요. 곧 시작합니다.</div>
@@ -2490,9 +2490,9 @@ function openTypeDetail(){
 $('#btnTypeDetail').addEventListener('click',openTypeDetail);
 
 /* ══════════════════════════════════════════════════════════════
-   게이트 (15초 과몰입 방지) — 최초 진입 / 새로고침 / 다시하기 시 표시
+   게이트 (10초 과몰입 방지) — 최초 진입 / 새로고침 / 다시하기 시 표시
    ══════════════════════════════════════════════════════════════ */
-const GATE_SEC = 15;
+const GATE_SEC = 10;
 const GATE_MSGS = [
   {i:'🎮', t:'이건 <b>게임</b>이에요.<br>실제 주식과 전혀 다릅니다.'},
   {i:'⏱️', t:'진짜 투자는 <b>몇 년</b>을 봅니다.<br>240초로 승부하지 않아요.'},
@@ -3068,7 +3068,7 @@ window.addEventListener('beforeunload', e=>{
   const params=new URLSearchParams(location.search);
   if(params.get('admin')==='1'){
     ADMIN_MODE = true;
-    // 게이트(15초 대기) 없이 바로 인증 화면 — 학번 3324 + 고정 비밀번호만 통과
+    // 게이트(10초 대기) 없이 바로 인증 화면 — 학번 3324 + 고정 비밀번호만 통과
     goScreen('auth');
     const auth=$('#auth');
     auth.querySelector('.brand').textContent='결과 관리자';
