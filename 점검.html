@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>점검 중입니다</title>
+
+<style>
+:root{
+    --navy:#10131a;
+    --navy2:#171b26;
+    --line:#2b3242;
+    --gold:#f4b740;
+    --ink:#e8ecf4;
+    --ink-dim:#9aa3b8;
+    --up:#26d07c;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:var(--navy);
+    color:var(--ink);
+    font-family:sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:500px;
+    background:var(--navy2);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:30px;
+}
+
+h1{
+    text-align:center;
+    color:var(--gold);
+    margin-bottom:10px;
+}
+
+.notice{
+    text-align:center;
+    color:var(--ink-dim);
+    line-height:1.6;
+    margin-bottom:30px;
+}
+
+.rank-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:15px;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.live{
+    color:var(--up);
+    font-size:12px;
+}
+
+.rank-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.rank-item{
+    background:var(--navy);
+    padding:12px;
+    border-radius:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.rank-item.top1{
+    border:1px solid var(--gold);
+}
+
+.rank-item span:first-child{
+    font-weight:bold;
+}
+
+.footer{
+    margin-top:25px;
+    text-align:center;
+    color:var(--ink-dim);
+    font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🔧 점검 중입니다</h1>
+
+    <p class="notice">
+        현재 모의투자 배틀을 점검 중입니다.<br>
+        잠시 후 다시 이용해 주세요.
+    </p>
+
+    <div class="rank-title">
+        🏆 실시간 순위표
+        <span class="live">● LIVE</span>
+    </div>
+
+    <div class="rank-list">
+
+        <div class="rank-item top1">
+            <span>1위 홍길동</span>
+            <span>+38.42%</span>
+        </div>
+
+        <div class="rank-item">
+            <span>2위 김철수</span>
+            <span>+27.15%</span>
+        </div>
+
+        <div class="rank-item">
+            <span>3위 이영희</span>
+            <span>+19.88%</span>
+        </div>
+
+        <div class="rank-item">
+            <span>4위 박민수</span>
+            <span>+14.53%</span>
+        </div>
+
+        <div class="rank-item">
+            <span>5위 최지우</span>
+            <span>+11.20%</span>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        순위는 마지막 집계 기준입니다.
+    </div>
+
+</div>
+
+</body>
+</html>
