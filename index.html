@@ -1,41 +1,312 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시스템 점검</title>
-    <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f5f5f5;
-            font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>점검코인 (MTC)</title>
 
-        .container {
-            text-align: center;
-            padding: 40px;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
+body{
+    font-family: Pretendard, sans-serif;
+    background:#111827;
+    color:white;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
 
-        p {
-            font-size: 24px;
-            color: #555;
-        }
-    </style>
+.container{
+    max-width:700px;
+    width:100%;
+    background:#1f2937;
+    border-radius:20px;
+    padding:35px;
+    box-shadow:0 0 25px rgba(255,255,255,0.08);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:10px;
+}
+
+.warning{
+    background:#7c2d12;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:25px;
+    line-height:1.6;
+}
+
+.stock{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.price{
+    font-size:42px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+.change{
+    font-size:22px;
+    margin-top:8px;
+}
+
+.asset{
+    line-height:2;
+    font-size:20px;
+    margin-bottom:25px;
+}
+
+.buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin-bottom:25px;
+}
+
+button{
+    padding:18px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:hover{
+    transform:scale(1.03);
+}
+
+.buy{
+    background:#16a34a;
+    color:white;
+}
+
+.sell{
+    background:#dc2626;
+    color:white;
+}
+
+.news{
+    background:#374151;
+    padding:20px;
+    border-radius:12px;
+    line-height:1.7;
+    min-height:80px;
+}
+
+.goal{
+    margin-top:20px;
+    line-height:1.8;
+}
+
+.footer{
+    margin-top:25px;
+    text-align:center;
+    color:#9ca3af;
+}
+
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔧 시스템 점검 중입니다.</h1>
-        <p>보다 원활한 서비스를 위해 잠시 점검을 진행하고 있습니다.</p>
-        <p>잠시 후 다시 이용해 주세요.</p>
-    </div>
+
+<div class="container">
+
+<h1>🔧 시스템 점검 중</h1>
+
+<div class="warning">
+⚠️ <b>점검코인(MTC)</b>은 행동경제학 탐구를 위한 가상 종목입니다.<br>
+실제 주식과 아무런 관련이 없으며 가격은 JavaScript의 난수에 의해 결정됩니다.
+</div>
+
+<div class="stock">
+<h2>점검코인 (MTC)</h2>
+<div class="price" id="price">10,000원</div>
+<div class="change" id="change">0%</div>
+</div>
+
+<div class="asset">
+💰 보유 현금 : <span id="cash"></span>원<br>
+📈 보유 수량 : <span id="shares"></span>주<br>
+🏆 총 자산 : <span id="total"></span>원
+</div>
+
+<div class="buttons">
+<button class="buy" onclick="buyAll()">전량 매수</button>
+<button class="sell" onclick="sellAll()">전량 매도</button>
+</div>
+
+<div class="news" id="news">
+점검코인이 상장되었습니다!
+</div>
+
+<div class="goal">
+<b>도전 과제</b><br>
+□ 200만원 달성<br>
+□ 500만원 달성<br>
+□ 1000만원 달성<br>
+□ 1억원 달성<br>
+□ 상장폐지 당하기
+</div>
+
+<div class="footer">
+1초마다 가격이 변동됩니다.
+</div>
+
+</div>
+
+<script>
+
+let price = 10000;
+let previousPrice = price;
+
+let cash = 1000000;
+let shares = 0;
+
+const newsList = [
+"🚀 개미 투자자 대거 유입!",
+"🤑 기관(?)이 풀매수했습니다.",
+"📈 FOMO가 감지되었습니다.",
+"📉 시스템 점검이 연장되었습니다.",
+"🔥 운영자가 떡상을 선언했습니다.",
+"💀 서버가 울고 있습니다.",
+"🚨 행동경제학적 편향이 감지되었습니다.",
+"📢 상한가? 그런 건 없습니다.",
+"📉 손실회피 편향 ON.",
+"🚀 점검코인 TO THE MOON!",
+];
+
+function format(num){
+    return Math.floor(num).toLocaleString();
+}
+
+function updateUI(){
+
+    let total = cash + shares*price;
+
+    document.getElementById("price").innerText =
+    format(price)+"원";
+
+    let percent = (((price-previousPrice)/previousPrice)*100).toFixed(2);
+
+    if(percent>0){
+        document.getElementById("change").innerHTML =
+        "▲ +"+percent+"%";
+    }else{
+        document.getElementById("change").innerHTML =
+        "▼ "+percent+"%";
+    }
+
+    document.getElementById("cash").innerText =
+    format(cash);
+
+    document.getElementById("shares").innerText =
+    shares;
+
+    document.getElementById("total").innerText =
+    format(total);
+
+    if(total>=100000000){
+        alert("🎉 1억원 달성!\n실제 주식 시장에서는 이런 일이 잘 일어나지 않습니다.");
+    }
+
+    if(total<=1000){
+        alert("☠ 파산!\n손실회피 편향이 감지되었습니다.");
+        cash=1000000;
+        shares=0;
+    }
+
+}
+
+function buyAll(){
+
+    let quantity = Math.floor(cash/price);
+
+    if(quantity<=0) return;
+
+    shares += quantity;
+    cash -= quantity*price;
+
+    updateUI();
+
+}
+
+function sellAll(){
+
+    cash += shares*price;
+    shares=0;
+
+    updateUI();
+
+}
+
+function randomNews(){
+
+    const random =
+    newsList[Math.floor(Math.random()*newsList.length)];
+
+    document.getElementById("news").innerText = random;
+
+}
+
+function changePrice(){
+
+    previousPrice = price;
+
+    let random = Math.random();
+
+    // 1% 확률 500% 상승
+    if(random<0.01){
+
+        price *= 6;
+        randomNews();
+
+    }
+
+    // 1% 확률 90% 폭락
+    else if(random<0.02){
+
+        price *=0.1;
+        randomNews();
+
+    }
+
+    // 일반 변동 (-50% ~ +100%)
+    else{
+
+        let change =
+        Math.random()*1.5 -0.5;
+
+        price *= (1+change);
+
+    }
+
+    if(price<1){
+        price=1;
+    }
+
+    price=Math.floor(price);
+
+    updateUI();
+
+}
+
+updateUI();
+
+setInterval(changePrice,1000);
+setInterval(randomNews,5000);
+
+</script>
+
 </body>
 </html>
