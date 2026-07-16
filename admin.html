@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>모의투자 배틀 — 운영자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#10131a; --navy2:#171b26; --navy3:#1f2432; --line:#2b3242;
+  --gold:#f4b740; --gold-dim:#a9822f;
+  --up:#26d07c; --down:#ff4d5e;
+  --ink:#e8ecf4; --ink-dim:#9aa3b8; --ink-faint:#666e82;
+  --disp:'Oswald',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--navy);color:var(--ink);font-family:var(--body);font-size:14px;
+  line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit}
+button:disabled{opacity:.4;cursor:not-allowed}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .down{color:var(--down)}
+.hidden{display:none!important}
+
+/* ── 로그인 ── */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{width:100%;max-width:400px;background:var(--navy2);border:1px solid var(--line);
+  border-radius:18px;padding:32px 28px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.brand{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:.28em;
+  color:var(--gold);text-transform:uppercase;text-align:center;margin-bottom:6px}
+.title{font-family:var(--disp);font-weight:700;font-size:32px;text-align:center;margin-bottom:22px}
+.title .amp{color:var(--gold)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--ink-dim);margin-bottom:7px;font-weight:600}
+.field input{width:100%;background:var(--navy);border:1px solid var(--line);border-radius:10px;
+  padding:13px 14px;color:var(--ink);font-size:15px;font-family:var(--body)}
+.field input:focus{outline:none;border-color:var(--gold)}
+.field input:disabled{color:var(--ink-faint)}
+.err{min-height:18px;font-size:12.5px;color:var(--down);font-weight:600;margin:4px 0 8px;
+  text-align:center;line-height:1.5}
+.primary{width:100%;background:var(--gold);color:#1a1300;font-weight:700;font-size:16px;
+  border-radius:12px;padding:15px;margin-top:6px;font-family:var(--disp);letter-spacing:.04em}
+.primary:active{transform:translateY(1px)}
+.hint{margin-top:16px;background:var(--navy);border:1px dashed var(--gold-dim);border-radius:10px;
+  padding:12px;font-size:11.5px;color:var(--ink-dim);line-height:1.7}
+.hint b{color:var(--gold)}
+
+/* ── 대시보드 ── */
+#dash{padding:20px;max-width:1400px;margin:0 auto}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.top h1{font-family:var(--disp);font-size:22px}
+.who{font-family:var(--mono);font-size:11px;background:var(--navy3);border:1px solid var(--line);
+  border-radius:7px;padding:4px 9px;color:var(--ink-dim)}
+.out{margin-left:auto;font-size:12px;color:var(--ink-faint);background:var(--navy2);
+  border:1px solid var(--line);border-radius:8px;padding:7px 12px}
+
+.load-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.btn{background:var(--navy2);border:1px solid var(--line);border-radius:10px;padding:11px 16px;
+  font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
+.btn:hover:not(:disabled){border-color:var(--gold-dim)}
+.btn.go{background:var(--gold);color:#1a1300;border-color:var(--gold);font-weight:700}
+.btn.hero{background:linear-gradient(135deg,#2a3348,#1c2233);border:1.5px solid var(--gold);
+  color:var(--gold);font-weight:700;font-size:14px;padding:14px 20px}
+.btn.hero:hover{background:linear-gradient(135deg,#33405c,#232b40)}
+
+.status{font-size:12.5px;color:var(--ink-dim);margin-bottom:16px;min-height:20px;
+  display:flex;align-items:center;gap:8px}
+.spin{width:13px;height:13px;border:2px solid var(--gold-dim);border-top-color:var(--gold);
+  border-radius:50%;animation:sp .7s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.bar{height:5px;background:var(--navy3);border-radius:3px;overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold-dim),var(--gold));
+  transition:width .2s}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:22px}
+.stat{background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.stat .k{font-size:10.5px;color:var(--ink-faint);margin-bottom:4px;font-weight:600}
+.stat .v{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--gold)}
+
+.sec{font-family:var(--disp);font-size:16px;color:var(--gold);margin:22px 0 10px;
+  display:flex;align-items:center;gap:8px}
+.sec .note{font-family:var(--body);font-size:11px;color:var(--ink-faint);font-weight:400}
+
+.dl-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.dl-note{font-size:11.5px;color:var(--ink-faint);line-height:1.7;margin-bottom:6px}
+.dl-note b{color:var(--gold-dim)}
+
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:11.5px;font-family:var(--mono)}
+th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);
+  padding:6px 9px;text-align:left;white-space:nowrap}
+th{background:var(--navy2);color:var(--gold);font-family:var(--body);font-weight:600;
+  position:sticky;top:0;font-size:11px}
+tr:hover td{background:#ffffff06}
+td:last-child,th:last-child{border-right:none}
+.cmp th:first-child{color:var(--ink-dim)}
+.cmp td:first-child{color:var(--ink-dim);font-family:var(--body);font-weight:600}
+
+.toast-wrap{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100;
+  display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--navy3);border:1px solid var(--gold-dim);padding:10px 16px;
+  border-radius:22px;font-size:13px;font-weight:600;box-shadow:0 10px 26px rgba(0,0,0,.5);
+  animation:tin .3s ease}
+@keyframes tin{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@media(max-width:560px){ #dash{padding:14px} .stat .v{font-size:17px} }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+<section id="login">
+  <div class="card">
+    <div class="brand">Zalpha Invest Lab</div>
+    <div class="title">운영자 <span class="amp">로그인</span></div>
+    <div class="field">
+      <label>관리자 계정</label>
+      <input id="admEmail" type="text" value="3324.dahyeon@zalpha-admin.local" disabled>
+    </div>
+    <div class="field">
+      <label>비밀번호</label>
+      <input id="admPw" type="password" placeholder="비밀번호를 입력하세요" autocomplete="current-password">
+    </div>
+    <div class="err" id="admErr"></div>
+    <button class="primary" id="btnAdmLogin">로그인</button>
+    <div class="hint">
+      🔑 Firebase 콘솔 → <b>Authentication</b> → 이메일/비밀번호 사용 설정 →
+      <b>사용자 추가</b>에서 위 이메일로 계정을 만들어 두세요.<br>
+      이 페이지는 학생용 앱과 <b>완전히 분리</b>돼 있어요.
+    </div>
+  </div>
+</section>
+
+<section id="dash" class="hidden">
+  <div class="top">
+    <h1>🔧 운영자 대시보드</h1>
+    <span class="who" id="whoAmI"></span>
+    <button class="out" id="btnAdmOut">로그아웃</button>
+  </div>
+
+  <div class="load-row">
+    <button class="btn go" id="btnLoad">☁️ 전체 데이터 불러오기</button>
+    <button class="btn" id="btnReload" disabled>🔄 새로고침</button>
+  </div>
+  <div class="status" id="status">아직 불러오지 않았어요. 위 버튼을 눌러주세요.</div>
+  <div class="bar"><i id="bar"></i></div>
+
+  <div id="body" class="hidden">
+    <div class="stats" id="stats"></div>
+
+    <div class="sec">📦 파일로 내보내기</div>
+    <div class="dl-note">
+      <b>클로드 분석용 JSON</b>이 이 부스의 메인이에요. 다운로드해서 대화창에 그대로 올리면
+      설계 정보·분석 가이드가 파일 안에 들어있어서 바로 분석이 됩니다.
+    </div>
+    <div class="dl-row">
+      <button class="btn hero" id="dlJSON">🤖 클로드 분석용 JSON 다운로드</button>
+      <button class="btn" id="dlSummary">📄 참가자 요약 CSV</button>
+      <button class="btn" id="dlTrades">📊 거래 단위 CSV</button>
+    </div>
+
+    <div class="sec">⚖️ 군중 조작 집단 비교 <span class="note">crowdGroup high vs low</span></div>
+    <div class="wrap"><table class="cmp" id="cmpTable"></table></div>
+
+    <div class="sec">👥 참가자 <span class="note" id="pCount"></span></div>
+    <div class="wrap"><table id="pTable"></table></div>
+  </div>
+</section>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ============================================================================
+   모의투자 배틀 — 운영자 대시보드 (학생용 index.html 과 완전 분리)
+   · Firebase Auth 로 로그인한 관리자만 users/plays 열람 가능 (rules 로 강제)
+   · 버튼 한 번 → 클로드 분석용 JSON / CSV 다운로드
+   ============================================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC87Zhrpi78xHIKZQRk9Bgth4ZfW3ekAJA",
+  authDomain: "jusik-66f8f.firebaseapp.com",
+  projectId: "jusik-66f8f",
+  storageBucket: "jusik-66f8f.firebasestorage.app",
+  messagingSenderId: "479564586578",
+  appId: "1:479564586578:web:5f7fc5b3854b05589c498b",
+  measurementId: "G-CFC5TC2H16"
+};
+const ADMIN_EMAIL = '3324.dahyeon@zalpha-admin.local';
+
+firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+const $ = s => document.querySelector(s);
+const won = n => Math.round(n).toLocaleString('ko-KR');
+function toast(msg, icon='✅'){
+  const t=document.createElement('div'); t.className='toast'; t.textContent=icon+' '+msg;
+  $('#toastWrap').appendChild(t);
+  setTimeout(()=>{ t.style.transition='.3s'; t.style.opacity='0'; setTimeout(()=>t.remove(),300); },1900);
+}
+
+/* ── 설계 상수 (index.html 과 동일해야 함) ── */
+const DESIGN = {
+  seed_cash:1000000, fee_rate:0.002, total_seconds:240,
+  ticks:34, seconds_per_tick:7,
+  ai_accuracy:0.49, info_accuracy:0.99, info_horizon_days:3,
+  manipulation:'crowdGroup(high/low) = 사회적 증거(H4) 무작위 배정. AI는 전원 49% 동일.',
+  series_shuffle:'세션마다 종목 이름↔가격데이터 매핑을 같은 레버리지 등급 내에서 셔플(반복 참여 시 암기 방지). '+
+                 '각 참가자의 실제 매핑은 seriesMap 필드 참조.',
+  stocks:[
+    {id:'zalpha', name:'잘파전자', leverage:false},
+    {id:'voyage', name:'항해사캐피탈', leverage:false},
+    {id:'panel', name:'패널스티커산업', leverage:false},
+    {id:'nuri', name:'누리식품', leverage:false},
+    {id:'winner', name:'승부사인터내셔널', leverage:true},
+    {id:'surfer', name:'서퍼푸드테크', leverage:true},
+    {id:'cocoa', name:'코인초콜릿홀딩스', leverage:true},
+    {id:'quantum', name:'퀀텀다이나믹스', leverage:true}
+  ]
+};
+const ANALYSIS_GUIDE = {
+  unit_of_analysis:'참가자 단위(plays 요약) + 거래 단위(plays[].events). 거래 단위 n이 훨씬 큼.',
+  key_metrics:{
+    처분효과:'sell 이벤트의 outcome(gain/loss) × holdSec 비교. dispositionGap = 손실보유 - 이익보유 (양수면 처분효과 존재)',
+    수수료침식:'grossReturnPct vs returnPct 차이, feeEatenPct(번 돈 중 수수료 비중), tradeCount 와의 상관',
+    분산부재:'maxAllocPct(단일매수 최대 비중), maxConcurrentHeld(동시보유 종목수), allInCount',
+    AI의존:'aiFollowRate, aiClickBeforeEntry(진입 전) vs aiClickWhileHolding(보유 중=확증편향)',
+    정보활용:'infoBought/verdictBought 와 returnPct 상관. 정보는 99% 적중이므로 활용 시 유리해야 정상',
+    근시안적손실회피:'soldBeforeTarget(반영일 전 매도) vs heldToTarget(버팀), patienceRate',
+    군중심리:'crowdGroup(high/low) 집단 간 비교. commPostViews 로 실제 노출자만 분리 가능',
+    지식행동괴리:'literacy(퀴즈 정답수 0~5) vs 실제 행동지표 상관'
+  },
+  caveats:'참가자 단위 집단비교(crowdGroup)는 표본이 작아 효과크기(Cohen d)와 신뢰구간 위주로 볼 것. p값은 참고.',
+  note_for_claude:'이 파일 하나로 분석이 가능하도록 설계 정보와 원본 이벤트 로그를 모두 포함했습니다. '+
+                  'plays[].events 에 매수/매도/AI조회/찌라시구매/커뮤니티열람 전 이벤트가 시간순으로 들어있습니다.'
+};
+
+/* ── 상태 (onAuthStateChanged 콜백이 참조하므로 반드시 그 위에 선언) ── */
+let PLAYS = [], USERS = [], READS = 0;
+
+/* ── 로그인 ── */
+$('#btnAdmLogin').addEventListener('click', doLogin);
+$('#admPw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+async function doLogin(){
+  const pw = $('#admPw').value;
+  $('#admErr').textContent = '';
+  if(!pw){ $('#admErr').textContent = '비밀번호를 입력해 주세요.'; return; }
+  const btn = $('#btnAdmLogin'); btn.disabled = true; btn.textContent = '확인 중…';
+  try{
+    await auth.signInWithEmailAndPassword(ADMIN_EMAIL, pw);
+  }catch(e){
+    const map = {
+      'auth/wrong-password':'비밀번호가 틀렸어요.',
+      'auth/invalid-credential':'비밀번호가 틀렸어요.',
+      'auth/user-not-found':'관리자 계정이 아직 Firebase에 등록되지 않았어요. (콘솔 → Authentication → 사용자 추가)',
+      'auth/too-many-requests':'시도가 너무 많아요. 잠시 후 다시 시도해 주세요.',
+      'auth/network-request-failed':'네트워크 오류예요. 인터넷을 확인해 주세요.',
+      'auth/operation-not-allowed':'콘솔에서 이메일/비밀번호 로그인이 아직 사용 설정되지 않았어요.'
+    };
+    $('#admErr').textContent = map[e.code] || ('로그인 실패: ' + (e.message || e.code));
+  }
+  btn.disabled = false; btn.textContent = '로그인';
+}
+$('#btnAdmOut').addEventListener('click', ()=> auth.signOut());
+auth.onAuthStateChanged(u=>{
+  if(u && u.email === ADMIN_EMAIL){
+    $('#login').classList.add('hidden');
+    $('#dash').classList.remove('hidden');
+    $('#whoAmI').textContent = u.email;
+  }else{
+    $('#dash').classList.add('hidden');
+    $('#login').classList.remove('hidden');
+    $('#admPw').value = '';
+    PLAYS = []; USERS = [];
+    $('#body').classList.add('hidden');
+    $('#status').textContent = '아직 불러오지 않았어요. 위 버튼을 눌러주세요.';
+    $('#btnReload').disabled = true;
+  }
+});
+
+/* ── 데이터 로드 ── */
+$('#btnLoad').addEventListener('click', loadAll);
+$('#btnReload').addEventListener('click', loadAll);
+
+function setStatus(html, spinning){
+  $('#status').innerHTML = (spinning ? '<span class="spin"></span>' : '') + '<span>'+html+'</span>';
+}
+async function loadAll(){
+  $('#btnLoad').disabled = true; $('#btnReload').disabled = true;
+  READS = 0; PLAYS = []; USERS = [];
+  setStatus('회원 목록 불러오는 중…', true);
+  $('#bar').style.width = '0';
+  try{
+    const usnap = await db.collection('users').get();
+    READS += usnap.size;
+    USERS = usnap.docs.map(d => ({ id:d.id, ...d.data() }));
+
+    const total = usnap.size || 1;
+    let done = 0;
+    for(const u of usnap.docs){
+      const ps = await u.ref.collection('plays').get();
+      READS += Math.max(1, ps.size);
+      ps.forEach(p => PLAYS.push({ ...p.data(), _playId:p.id, studentId:u.id, userName:u.data().name }));
+      done++;
+      $('#bar').style.width = (done/total*100) + '%';
+      setStatus(`플레이 기록 불러오는 중… ${done}/${total}명 · ${PLAYS.length}판`, true);
+    }
+    PLAYS.sort((a,b)=> String(a.startedAt).localeCompare(String(b.startedAt)));
+
+    if(!PLAYS.length){
+      setStatus('⚠️ 아직 플레이 기록이 없어요. 부스 진행 후 다시 불러와 주세요.', false);
+      $('#body').classList.add('hidden');
+    }else{
+      const nTrades = buildTradeRows(PLAYS).length;
+      setStatus(`✅ 회원 ${USERS.length}명 · 플레이 ${PLAYS.length}판 · 거래 이벤트 ${nTrades}건 · 읽기 ${READS}회 소모 (한도 50,000)`, false);
+      $('#body').classList.remove('hidden');
+      render();
+    }
+  }catch(e){
+    const msg = (e.code === 'permission-denied')
+      ? '❌ 권한 거부 — firestore.rules 에 관리자 규칙이 배포됐는지 확인하세요.'
+      : '❌ 불러오기 실패: ' + e.message;
+    setStatus(msg, false);
+  }
+  $('#btnLoad').disabled = false; $('#btnReload').disabled = false;
+}
+
+/* ── 변환 ── */
+function stripHeavy(r){
+  const o = { ...r }; delete o.events; delete o.design; delete o.seriesMap; return o;
+}
+function buildTradeRows(plays){
+  const out = [];
+  for(const r of plays){
+    for(const e of (r.events || [])){
+      if(e.type !== 'buy' && e.type !== 'sell' && e.type !== 'liquidate') continue;
+      out.push({
+        pid:r.pid, studentId:r.studentId ?? '', name:r.name, grade:r.grade, sex:r.sex,
+        marketSet:r.marketSet, crowdGroup:r.crowdGroup, literacy:r.literacy, playCount:r.playCount,
+        seriesFrom: r.seriesMap ? (r.seriesMap[e.stock] ?? '') : '',
+        action:e.type, stock:e.stock,
+        leverage:e.leverage?1:0, forced:e.forced?1:0,
+        elapsed:e.elapsed, tick:e.tick, day:e.day ?? '',
+        qty:e.qty, price:e.price, fee:e.fee,
+        avgCost:e.avgCost ?? '', plAmt:e.plAmt ?? '', plPct:e.plPct ?? '',
+        outcome:e.outcome ?? '', holdSec:e.holdSec ?? '', holdDays:e.holdDays ?? '',
+        fullExit:e.fullExit?1:'',
+        allocPct:e.allocPct ?? '', nHeldBefore:e.nHeldBefore ?? '',
+        crowdShown:e.crowdShown ?? '',
+        aiSeen:e.aiSeen?1:0, aiDir:e.aiDir ?? '', aiAgoSec:e.aiAgoSec ?? '', aiConf:e.aiConf ?? '',
+        aiFollowed:(e.aiFollow && e.aiFollow.followed)?1:0,
+        aiReactionMs:(e.aiFollow && e.aiFollow.reactionMs) ?? '',
+        infoSeen:e.infoSeen?1:0, infoSignal:e.infoSignal ?? '', verdictSeen:e.verdictSeen?1:0,
+        infoTargetDay:e.infoTargetDay ?? '', daysToTarget:e.daysToTarget ?? '',
+        beforeTarget: e.beforeTarget===true?1:(e.beforeTarget===false?0:''),
+        studentReturnPct:r.returnPct
+      });
+    }
+  }
+  return out;
+}
+function toCSV(rows){
+  if(!rows.length) return '';
+  const keys = [...new Set(rows.flatMap(r => Object.keys(r)))];
+  const esc = v => {
+    if(v == null) return '';
+    if(typeof v === 'object') v = JSON.stringify(v);
+    v = String(v);
+    return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
+  };
+  return keys.join(',') + '\n' + rows.map(r => keys.map(k => esc(r[k])).join(',')).join('\n');
+}
+function download(name, text, mime){
+  const blob = (mime === 'application/json')
+    ? new Blob([text], {type:'application/json'})
+    : new Blob(['\ufeff'+text], {type:'text/csv;charset=utf-8'});   // 엑셀 한글 깨짐 방지 BOM
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ── 다운로드 버튼 ── */
+$('#dlJSON').addEventListener('click', ()=>{
+  const payload = {
+    tool:'모의투자 배틀 — 행동재무 부스 실험',
+    exported_at:new Date().toISOString(),
+    n_users:USERS.length, n_plays:PLAYS.length,
+    n_trade_events:buildTradeRows(PLAYS).length,
+    design:DESIGN,
+    analysis_guide:ANALYSIS_GUIDE,
+    users:USERS.map(u=>({ studentId:u.id, name:u.name, grade:u.grade,
+      bestReturnPct:u.bestReturnPct ?? null, bestType:u.bestType ?? null,
+      playCount:u.playCount ?? 0, createdAt:u.createdAt ?? null, lastPlayedAt:u.lastPlayedAt ?? null })),
+    plays:PLAYS
+  };
+  const txt = JSON.stringify(payload, null, 2);
+  download(`mib_analysis_${PLAYS.length}판.json`, txt, 'application/json');
+  const mb = (new Blob([txt]).size/1048576).toFixed(2);
+  toast(`JSON 다운로드 완료 (${mb}MB) — 클로드에 올리세요`, '🤖');
+});
+$('#dlSummary').addEventListener('click', ()=>{
+  download('participants_summary.csv', toCSV(PLAYS.map(stripHeavy)));
+  toast(`참가자 요약 CSV — ${PLAYS.length}행`, '📄');
+});
+$('#dlTrades').addEventListener('click', ()=>{
+  const t = buildTradeRows(PLAYS);
+  download('trades_long.csv', toCSV(t));
+  toast(`거래 단위 CSV — ${t.length}행`, '📊');
+});
+
+/* ── 렌더 ── */
+function avg(arr, k){
+  const v = arr.map(r=>+r[k]).filter(x=>Number.isFinite(x));
+  return v.length ? (v.reduce((a,b)=>a+b,0)/v.length) : null;
+}
+function fmt(n, d=2){ return n===null ? '–' : n.toFixed(d); }
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c=>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function render(){
+  const trades = buildTradeRows(PLAYS);
+  const ret = avg(PLAYS,'returnPct');
+  const winRate = PLAYS.filter(p=>p.returnPct>0).length / PLAYS.length * 100;
+  $('#stats').innerHTML = [
+    ['회원 수', USERS.length+'명'],
+    ['플레이 판수', PLAYS.length+'판'],
+    ['거래 이벤트', trades.length+'건'],
+    ['평균 수익률', fmt(ret)+'%'],
+    ['플러스 비율', winRate.toFixed(0)+'%'],
+    ['평균 수수료', won(avg(PLAYS,'feeTotal')||0)+'원'],
+  ].map(([k,v])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+
+  // 집단 비교
+  const hi = PLAYS.filter(p=>p.crowdGroup==='high');
+  const lo = PLAYS.filter(p=>p.crowdGroup==='low');
+  const rows = [
+    ['평균 수익률(%)','returnPct'], ['수수료 전 수익률(%)','grossReturnPct'],
+    ['매매 횟수','tradeCount'], ['낸 수수료(원)','feeTotal'],
+    ['처분효과 갭(초)','dispositionGap'], ['레버리지 비중(%)','levTradeShare'],
+    ['AI 추종률(%)','aiFollowRate'], ['최대 집중도(%)','maxAllocPct'],
+    ['동시보유 종목수','maxConcurrentHeld'], ['정보 구매 횟수','infoBought'],
+    ['퀴즈 정답(0~5)','literacy'],
+  ];
+  $('#cmpTable').innerHTML =
+    `<tr><th>지표</th><th>high (${hi.length}판)</th><th>low (${lo.length}판)</th><th>전체 (${PLAYS.length}판)</th><th>차이</th></tr>` +
+    rows.map(([label,k])=>{
+      const a=avg(hi,k), b=avg(lo,k), c=avg(PLAYS,k);
+      const d = (a!==null&&b!==null) ? a-b : null;
+      const cls = d===null ? '' : (d>0?'up':(d<0?'down':''));
+      return `<tr><td>${label}</td><td>${fmt(a)}</td><td>${fmt(b)}</td><td>${fmt(c)}</td>
+        <td class="${cls}">${d===null?'–':(d>0?'+':'')+d.toFixed(2)}</td></tr>`;
+    }).join('');
+
+  // 참가자 표
+  const cols = ['userName','grade','marketSet','crowdGroup','literacy','returnPct','grossReturnPct',
+    'feeTotal','feeEatenPct','tradeCount','avgHoldSecGain','avgHoldSecLoss','dispositionGap',
+    'maxAllocPct','maxConcurrentHeld','levTradeShare','aiFollowRate','aiClickWhileHolding',
+    'infoBought','verdictBought','patienceRate','commPostViews','investType','playCount'];
+  $('#pCount').textContent = `${PLAYS.length}판 · 최근 순`;
+  $('#pTable').innerHTML =
+    `<tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr>` +
+    PLAYS.slice().reverse().map(r=>`<tr>${cols.map(c=>{
+      let v = r[c];
+      const cls = (c==='returnPct'||c==='grossReturnPct')
+        ? (v>=0?'up':'down') : '';
+      return `<td class="${cls}">${esc(v ?? '')}</td>`;
+    }).join('')}</tr>`).join('');
+}
+</script>
+</body>
+</html>
