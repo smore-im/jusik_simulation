@@ -400,17 +400,45 @@ async function loadAll(){
     READS += usnap.size;
     USERS = usnap.docs.map(d => ({ id:d.id, ...d.data(), guest: !!d.data().guest || /^G/.test(d.id) }));
 
-    const total = usnap.size || 1;
-    let done = 0;
-    for(const u of usnap.docs){
-      const ps = await u.ref.collection('plays').get();
-      READS += Math.max(1, ps.size);
-      const ud=u.data(); const isG=!!ud.guest || /^G/.test(u.id);
-      ps.forEach(p => PLAYS.push({ ...p.data(), _playId:p.id, studentId:u.id, userName:ud.name, isGuest:isG }));
-      done++;
-      $('#bar').style.width = (done/total*100) + '%';
-      setStatus(`플레이 기록 불러오는 중… ${done}/${total}명 · ${PLAYS.length}판`, true);
+    const umap = {};
+    usnap.docs.forEach(u => { umap[u.id] = u; });
+    const pushPlay = (p, sid) => {
+      const ud = (umap[sid] && umap[sid].data()) || {};
+      const isG = !!ud.guest || /^G/.test(sid);
+      PLAYS.push({ ...p.data(), _playId:p.id, studentId:sid, userName:ud.name, isGuest:isG });
+    };
+
+    setStatus('플레이 기록 불러오는 중…', true);
+    $('#bar').style.width = '40%';
+    let loaded = false;
+    try{
+      // 1순위: collectionGroup 한 번에 (가장 빠름) — 규칙에 {path=**}/plays 읽기 허용 필요
+      const psnap = await db.collectionGroup('plays').get();
+      READS += Math.max(1, psnap.size);
+      psnap.forEach(p => pushPlay(p, p.ref.parent.parent.id));
+      loaded = true;
+    }catch(e){
+      if(e.code !== 'permission-denied') throw e;
+      console.warn('collectionGroup 권한 없음 → 병렬 조회로 대체', e);
     }
+    if(!loaded){
+      // 2순위(대체): 회원별 plays를 동시에 병렬 조회
+      PLAYS = [];
+      const total = usnap.size || 1;
+      let done = 0;
+      const results = await Promise.all(usnap.docs.map(async u => {
+        const ps = await u.ref.collection('plays').get();
+        done++;
+        $('#bar').style.width = (done/total*100) + '%';
+        setStatus(`플레이 기록 불러오는 중… ${done}/${total}명`, true);
+        return { u, ps };
+      }));
+      for(const { u, ps } of results){
+        READS += Math.max(1, ps.size);
+        ps.forEach(p => pushPlay(p, u.id));
+      }
+    }
+    $('#bar').style.width = '100%';
     PLAYS.sort((a,b)=> String(a.startedAt).localeCompare(String(b.startedAt)));
 
     if(!PLAYS.length){
@@ -572,7 +600,7 @@ if(window.Chart){
   Chart.defaults.borderColor = 'rgba(43,50,66,.7)';
   Chart.defaults.font.family = "'Inter',sans-serif";
   Chart.defaults.plugins.legend.labels.boxWidth = 12;
-  Chart.defaults.animation.duration = 900;
+  Chart.defaults.animation.duration = 250;
 }
 function mk(id, cfg){
   if(!window.Chart) return;
